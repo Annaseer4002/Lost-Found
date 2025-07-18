@@ -1,10 +1,12 @@
 const express = require('express')
 const Router = express.Router()
 const itemRoutes = require('./itemRoutes')
+const authRoutes = require('./authRoutes')
 
 
 const routes = [
-    itemRoutes
+    itemRoutes,
+    authRoutes
 ]
 
 module.exports = routes
