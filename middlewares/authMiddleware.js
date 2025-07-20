@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const authModel = require('../models/authModel');
+const Auth = require('../models/authModel');
 
 const validateSignUp = async (req, res, next) => {
 
