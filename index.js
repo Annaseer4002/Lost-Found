@@ -24,5 +24,10 @@ mongoose.connect(process.env.MONGODB_URL)
     })
 })
 
+app.get('/', (req, res) => {
+    res.status(200).json({
+        message: "Welcome to Lost and Found API"
+    })
+})
 
 app.use('/api', routes)
