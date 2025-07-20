@@ -1,7 +1,7 @@
 const mongoose = require ('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const authModel = require('../models/authModel');
+const Auth = require('../models/authModel');
 
 const HandleSignUp = async (req, res) => {
     const {username, email, password} = req.body;
