@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const Auth = require('../models/authModel');
 
 const HandleSignUp = async (req, res) => {
-    const {username, email, password} = req.body;
+    const {username, email, password, phoneNumber} = req.body;
     
     try {
 
@@ -13,7 +13,8 @@ const HandleSignUp = async (req, res) => {
        const user = new Auth({
          username,
          email,
-         password: hashedPassword
+         password: hashedPassword,
+         phoneNumber
        }) 
 
        await user.save();
@@ -24,7 +25,8 @@ const HandleSignUp = async (req, res) => {
             id: user?._id,
             username: user?.username,
             email: user?.email,
-            role: user?.user.role
+            phoneNumber: user?.phoneNumber,
+            role: user?.role
          }
        })
         
@@ -53,7 +55,7 @@ const HandleLogin = async (req, res) => {
         return res.status(404).json({message: 'user account not found'})
     }
 
-    const isMatch = await bcrypt.verify(password, user.password)
+    const isMatch = await bcrypt.compare(password, user.password)
 
     if(!isMatch){
         return res.status(400).json({message:'Incorrect email or password'})
@@ -67,7 +69,7 @@ const HandleLogin = async (req, res) => {
 
     const refreshToken = jwt.sign(
         { user: user._id },
-        process.env.REFRESHTOKEN,
+        process.env.REFRESH_TOKEN,
         { expiresIn: '1d' }
     )
 
@@ -92,7 +94,64 @@ const HandleLogin = async (req, res) => {
         
 }
 
+const HandleFindAllUsers = async (req, res) => {
+    
+    try {
+        
+        const allUsers = await Auth.find()
+       
+        if(allUsers.length === 0){
+            return res.status(404).json({message: "No users found"})
+        }
+
+        res.status(200).json({
+            message: "Success",
+            allUsers: allUsers.map(user => ({
+                id: user._id,
+                username: user.username,
+                email: user.email,
+                phoneNumber: user.phoneNumber,
+                role: user.role
+            }))
+        })
+        
+
+   
+        
+    } catch (error) {
+        res.status(500).json(error.message);
+    }
+   
+}
+
+const HandleDeleteUser = async (req, res) => {
+    const {id} = req.params;
+
+    try {
+
+        if(!id){
+            return res.status(400).json({message: "Please provide user id"})
+        }
+
+        const deletedUser = await Auth.findByIdAndDelete(id);
+
+        if(!deletedUser){
+            return res.status(404).json({message: "User not found"})
+        }
+
+        res.status(200).json({
+            message: "User deleted successfully",
+            deletedUser
+        })
+
+    } catch (error) {
+        res.status(500).json(error.message);
+    }
+}
+
 module.exports = {
     HandleSignUp,
-    HandleLogin
+    HandleLogin,
+    HandleFindAllUsers,
+    HandleDeleteUser
 }
