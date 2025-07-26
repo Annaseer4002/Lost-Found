@@ -64,7 +64,7 @@ const HandleLogin = async (req, res) => {
     const token = jwt.sign(
          { user },
          process.env.ACCESS_TOKEN,
-         { expiresIn: '1h' }   
+         { expiresIn: '5h' }   
     ) 
 
     const refreshToken = jwt.sign(

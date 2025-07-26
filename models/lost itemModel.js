@@ -9,7 +9,9 @@ const lostItemSchema = new mongoose.Schema({
     isFound: { type: String, default: 'Not found', enum: ['Not found', 'Found'] }
 
     
-
+}, { timestamps: true
 })
 
-module.exports = new mongoose.Model("LostItem", lostItemSchema)
+const LostItem = new mongoose.model ('LostItem', lostItemSchema)
+
+module.exports = LostItem

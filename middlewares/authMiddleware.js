@@ -38,19 +38,19 @@ const Authorization = async (req, res, next) => {
         return res.status(401).json({message: "Access denied, no token provided"});
     }
     
-    console.log(token)
+    // console.log(token)
 
     try {
 
         const splitToken = token.split(" ")
-        console.log(splitToken);
+        // console.log(splitToken);
 
         const realToken = splitToken[1]
-        console.log(realToken);
+        // console.log(realToken);
         
         
         const decoded = Jwt.verify(realToken, process.env.ACCESS_TOKEN)
-        console.log(decoded);
+        // console.log(decoded);
        
 
         if(!decoded) {
@@ -58,8 +58,8 @@ const Authorization = async (req, res, next) => {
         }
 
        req.user = decoded.user
-         console.log(req.user);
-         console.log(req.user.username)
+        //  console.log(req.user);
+        //  console.log(req.user.username)
 
 
         next()
