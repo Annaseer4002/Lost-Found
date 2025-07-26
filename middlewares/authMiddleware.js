@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Auth = require('../models/authModel');
-const { JsonWebTokenError } = require('jsonwebtoken');
+const Jwt = require('jsonwebtoken');
 
 const validateSignUp = async (req, res, next) => {
 
@@ -51,12 +51,15 @@ const Authorization = async (req, res, next) => {
         
         const decoded = Jwt.verify(realToken, process.env.ACCESS_TOKEN)
         console.log(decoded);
+       
 
         if(!decoded) {
             return res.status(401).json({message: "Invalid token"});
         }
 
-        
+       req.user = decoded.user
+         console.log(req.user);
+         console.log(req.user.username)
 
 
         next()
@@ -68,7 +71,26 @@ const Authorization = async (req, res, next) => {
 
 }
 
+
+const isAdmin = async (req, res, next) => {
+
+   
+    try {
+
+            if(req.user.role !== 'admin'){
+            return res.status(403).json({message: "Access denied, admin only"});
+        }
+
+        next()
+   
+    } catch (error) {
+        return res.status(500).json(error.message)
+    }
+
+}
+
 module.exports = {
     validateSignUp,
-    Authorization
+    Authorization,
+    isAdmin
 }

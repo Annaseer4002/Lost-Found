@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
-const Item = require("../models/itemModel");
+const Item = require("../models/found itemModel");
+const { allFoundItems } = require('../services/foundItemServices');
 
 
 const HandleReportFoundItem = async (req, res) => {
@@ -23,7 +24,8 @@ const HandleReportFoundItem = async (req, res) => {
         name, 
         description, 
         location, 
-        image
+        image,
+        userId: req.user._id
     })
 
 
@@ -32,6 +34,7 @@ const HandleReportFoundItem = async (req, res) => {
     res.status(201).json({
         message: "Found item reported successfully",
         item: {
+            userId: item?.userId,
             id: item?._id,
             name: item?.name,
             description: item?.description,
@@ -129,6 +132,22 @@ const HandleDeleteItem = async (req, res) => {
     }
 }
 
+const HandleFindAllFoundItems = async (req, res) => {
+    try {
+
+         const foundItems = await allFoundItems();
+
+         res.status(200).json({
+            message: 'Success',
+            foundItems
+         })
+        
+    } catch (error) {
+        res.status(500).json(error.message);
+    }
+   
+}
+
 
 
 module.exports = {
@@ -136,5 +155,6 @@ module.exports = {
     HandleFindUnclaimedItems,
     HandleGetOneItem,
     HandleUpdateItemToClaimed,
-    HandleDeleteItem
+    HandleDeleteItem,
+    HandleFindAllFoundItems
 }

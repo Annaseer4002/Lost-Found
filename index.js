@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const dotenv = require('dotenv');
 dotenv.config();
 const cors = require('cors');
-const Item = require("./models/itemModel");
 const routes = require("./routes");
 
 const app = express()
@@ -26,7 +25,7 @@ mongoose.connect(process.env.MONGODB_URL)
 
 app.get('/', (req, res) => {
     res.status(200).json({
-        message: "Welcome to Lost and Found API"
+        message: "Welcome to Lost and Found APIs"
     })
 })
 
