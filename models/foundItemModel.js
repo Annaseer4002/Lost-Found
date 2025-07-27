@@ -6,7 +6,7 @@ const itemSchema = new mongoose.Schema({
     description: {type: String, require: true},
     location: {type: String, require: true},
     date: {type: Date, default: Date.now},
-    claimed: {type: Boolean, default: false},
+    claimed: {type: Boolean, default: 'Unclaimed', enum: ['claimed', 'unclaimed']},
     image: {type: String, default: ' '}
 },{timeStamp: true})
 

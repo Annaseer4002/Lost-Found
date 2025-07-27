@@ -1,8 +1,8 @@
 const express = require('express')
 const Router = express.Router()
-const foundItemRoutes = require('./found itemRoutes')
+const foundItemRoutes = require('./foundItemRoutes')
 const authRoutes = require('./authRoutes')
-const lostItemRoutes = require('./lost itemRoutes')
+const lostItemRoutes = require('./lostItemRoutes')
 
 
 const routes = [

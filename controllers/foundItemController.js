@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const Item = require("../models/found itemModel");
+const Item = require("../models/foundItemModel");
 const { allFoundItems } = require('../services/foundItemServices');
 
 
@@ -49,7 +49,7 @@ const HandleReportFoundItem = async (req, res) => {
 const HandleFindUnclaimedItems = async (req, res) => {
     try {
         
-        const unclaimedItems = await Item.find({ claimed: 'false' });
+        const unclaimedItems = await Item.find({ claimed: 'false' }).populate('userId', 'username email');
 
         if(!unclaimedItems){
             return res.status(404).json({message: "No unclaimed items found"});
@@ -92,20 +92,18 @@ const HandleGetOneItem = async (req, res) => {
 const HandleUpdateItemToClaimed = async (req, res) => {
       const {id} = req.params;
 
-    const {claimed} = req.body;
 
     try {
 
-
-    if(!id || !claimed){
-        return res.status(400).json({message: "Please provide item id and claimed status"})
-    }
-
-    const updatedItem = await Item.findById(id);
+     const updatedItem = await Item.findById(id);
 
     if(!updatedItem){
         return res.status(404).json({message: "item not found"})
     }
+
+    updatedItem.status = 'Claimed'
+
+    await updatedItem.save()
 
     res.status(200).json({
         message: "Success",

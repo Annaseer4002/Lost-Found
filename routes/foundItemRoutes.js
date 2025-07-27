@@ -1,5 +1,5 @@
 const express = require ('express')
-const { HandleReportFoundItem, HandleFindUnclaimedItems, HandleGetOneItem, HandleUpdateItemToClaimed, HandleDeleteItem, HandleFindAllFoundItems } = require('../controllers/found itemController')
+const { HandleReportFoundItem, HandleFindUnclaimedItems, HandleGetOneItem, HandleUpdateItemToClaimed, HandleDeleteItem, HandleFindAllFoundItems } = require('../controllers/foundItemController')
 const { Authorization, isAdmin } = require('../middlewares/authMiddleware')
 
 const Router = express.Router()

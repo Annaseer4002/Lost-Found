@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Item = require('../models/found itemModel');
+const Item = require('../models/foundItemModel');
 
 const allFoundItems = async (req, res) => {
     try {

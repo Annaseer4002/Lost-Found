@@ -6,7 +6,7 @@ const lostItemSchema = new mongoose.Schema({
     description: { type: String, required: true },
     image: {type: String, default:' '},
     dateLost: { type: Date, default: Date.now},
-    isFound: { type: String, default: 'Not found', enum: ['Not found', 'Found'] }
+    status: { type: String, default: 'pending', enum: ['pending', 'found'] }
 
     
 }, { timestamps: true
