@@ -2,7 +2,8 @@ const mongoose = require('mongoose')
 
 const lostItemSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Auth', required: true},
-    itemname: { type: String, required: true },
+    name: { type: String, required: true },
+    location: { type: String, default: ' '},
     description: { type: String, required: true },
     image: {type: String, default:' '},
     dateLost: { type: Date, default: Date.now},

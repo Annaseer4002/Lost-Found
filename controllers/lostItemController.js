@@ -1,5 +1,6 @@
 const mongoose = require ('mongoose')
 const LostItem = require('../models/lostItemModel')
+const { matchedItems } = require('../services/matchItemService')
 
 
 
@@ -9,13 +10,14 @@ const HandleReportLostItem = async (req, res) => {
    
   try {
          
-     const {itemname, description, image} = req.body
+     const {name, description, image, location} = req.body
 
      userId = req.user._id
+     
  
      
  
-     if(!itemname){
+     if(!name){
          return res.status(400).json({message:'item name is required'})
      }
  
@@ -25,27 +27,26 @@ const HandleReportLostItem = async (req, res) => {
  
      const lostItem = new LostItem ({
          userId,
-         itemname,
+         name,
          description,
-         image
+         image,
+         location
      })
  
  
  
      await lostItem.save()
+     
+     const Matched = await matchedItems(req.body)
 
      res.status(201).json({
         message: "Lost item reported successfully",
-        lostItem
+        lostItem,
+        Matched
      })
  
 
- 
- 
- 
- 
-         
-      } catch (error) {
+     } catch (error) {
          res.status(500).json(error.message)
       }
  
