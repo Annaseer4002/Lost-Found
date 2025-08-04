@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const Item = require("../models/foundItemModel");
 const { allFoundItems } = require('../services/foundItemServices');
+const matchedItems = require('../services/matchItemService');
 
 
 const HandleReportFoundItem = async (req, res) => {
@@ -31,6 +32,8 @@ const HandleReportFoundItem = async (req, res) => {
 
     await item.save();
 
+    await matchedItems(item);
+
     res.status(201).json({
         message: "Found item reported successfully",
         item: {
@@ -49,7 +52,7 @@ const HandleReportFoundItem = async (req, res) => {
 const HandleFindUnclaimedItems = async (req, res) => {
     try {
         
-        const unclaimedItems = await Item.find({ claimed: 'false' }).populate('userId', 'username email');
+        const unclaimedItems = await Item.find({ claimed: 'unclaimed' }).populate('userId', 'username email');
 
         if(!unclaimedItems){
             return res.status(404).json({message: "No unclaimed items found"});

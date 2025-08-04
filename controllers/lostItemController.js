@@ -1,7 +1,6 @@
 const mongoose = require ('mongoose')
 const LostItem = require('../models/lostItemModel')
-const { matchedItems } = require('../services/matchItemService')
-
+const matchedItems = require('../services/matchItemService')
 
 
 
@@ -36,13 +35,15 @@ const HandleReportLostItem = async (req, res) => {
  
  
      await lostItem.save()
-     
-     const Matched = await matchedItems(req.body)
+  
 
-     res.status(201).json({
+     await matchedItems
+     
+
+     res.status(201).json({ 
         message: "Lost item reported successfully",
         lostItem,
-        Matched
+        matched
      })
  
 

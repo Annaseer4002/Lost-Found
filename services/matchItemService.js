@@ -1,58 +1,60 @@
 const mongoose = require('mongoose');
 const Item = require('../models/foundItemModel');
 const LostItem = require('../models/lostItemModel');
+const sendMatchedItemsMail = require('../utils/sendMatchedItemsMail');
 
-const matchedItems = async (req, res) => {
 
 
-    try {
+const matchedItems = async (lostItems, foundItems) => {
 
-        const items = await Item.find({claimed: 'unclaimed'})
+  try {
 
-        const matches = []
+      const lostItems = await LostItem.find({status: 'pending'}).populate('userId', 'username email')
+        const foundItems = await Item.find({claimed: 'unclaimed'}).populate('userId', 'username email');
+        const matches = [];
+        for (let lostItem of lostItems) {
+          for (let item of foundItems) {
 
-      
+            const score = 0;
+            
+            if(lostItem.name.toLowerCase().includes(item.name.toLowerCase())){
+              score += 30
+            }
 
-        for (let item of items) {
-              let score = 0
+            if(lostItem.description.toLowerCase().slice(0, 10).includes(item.description.toLowerCase())){
+              score += 30
+            }
 
-              if(req.body.name.toLowerCase().includes(item.name.toLowerCase()) ||
-              item.name.toLowerCase().includes(req.body.name.toLowerCase()))
-              {
-                score += 30
-              }
+            if(lostItem.location.toLowerCase().slice(0, 10).includes(item.location.toLowerCase())){
+              score += 30
+            }
 
-               if(req.body.description.slice(0, 10).toLowerCase().includes(item.description.slice(0, 10).toLowerCase()) ||
-              item.description.slice(0, 10).toLowerCase().includes(req.body.description.slice(0, 10).toLowerCase()))
-              {
-                score += 30
-              }
-              
-              if(req.body.location.slice(0, 10).toLowerCase().includes(item.location.slice(0, 10).toLowerCase()) ||
-                item.location.slice(0, 10).toLowerCase().includes(req.body.location.slice(0, 10).toLowerCase()))
-                {
-                    score += 30
-                }
+            if(lostItem.dateLost.includes(item.date)){
+              score += 10
+            }
 
-                if (score >= 60){
-                    matches.push({item, score})
-                }
+            if(score => 60){
+              await sendMatchedItemsMail(lostItem.email, [item])
+            }
+
+          }
         }
-        if (matches.length === 0) {
-            return res.status(404).json({ message: 'No matches found' });
-        }
-        matches.sort((a, b) => b.score - a.score);
 
-        return res.status(200).json({ matches });
+        matches.push(item)
 
-        
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-        
-    }
+
     
-}
+  } catch (error) {
+    throw error;
+    
+  }
 
-module.exports = {
-  matchedItems
 }
+    
+        
+    
+      
+  
+
+
+module.exports = matchedItems;
