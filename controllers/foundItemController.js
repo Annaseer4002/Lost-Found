@@ -2,6 +2,9 @@ const mongoose = require('mongoose')
 const Item = require("../models/foundItemModel");
 const { allFoundItems } = require('../services/foundItemServices');
 const matchedItems = require('../services/matchItemService');
+const LostItem = require('../models/lostItemModel');
+const sendMatchedItemsMail = require('../utils/sendMatchedItemsMail');
+
 
 
 const HandleReportFoundItem = async (req, res) => {
@@ -32,7 +35,45 @@ const HandleReportFoundItem = async (req, res) => {
 
     await item.save();
 
-    await matchedItems(item);
+    // await matchedItems()
+
+    // check if matched Lost items
+    const lostItems = await LostItem.find({status:'pending'}).populate('userId', 'email')
+      
+    // const matches = [];
+
+    for(lostItem of lostItems){
+         const matches = [];
+
+
+        let score = 0
+        if(lostItem.name.toLowerCase().includes(item.name.toLowerCase())){
+            score += 30
+        }
+        if(lostItem.description.toLowerCase().slice(0, 10).includes(item.description.toLowerCase())){
+            score += 30
+        }
+        if(lostItem.location.toLowerCase().slice(0, 10).includes(item.location.toLowerCase())){
+            score += 30
+        }
+        
+        const dateDiff = Math.abs(new Date(lostItem.dateLost) - new Date(item.date));
+        const diffInDays = dateDiff / (1000 * 60 * 60 * 24);
+        if (diffInDays <= 3) score += 10;
+
+        if(score >= 60){
+       console.log(item)
+          matches.push(item)
+         await sendMatchedItemsMail(lostItem.userId.email, matches)
+
+        }
+ 
+    }
+    
+  
+   
+
+   
 
     res.status(201).json({
         message: "Found item reported successfully",
@@ -45,7 +86,9 @@ const HandleReportFoundItem = async (req, res) => {
             date: item?.date,
             claimed: item?.claimed,
             image: item?.image
-        }
+        },
+        possibleMatches: matches || "No matches found"
+        // matchedItems
     })
 }
 

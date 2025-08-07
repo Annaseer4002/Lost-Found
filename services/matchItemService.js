@@ -11,11 +11,12 @@ const matchedItems = async (lostItems, foundItems) => {
 
       const lostItems = await LostItem.find({status: 'pending'}).populate('userId', 'username email')
         const foundItems = await Item.find({claimed: 'unclaimed'}).populate('userId', 'username email');
-        const matches = [];
+        
         for (let lostItem of lostItems) {
+          const matches = [];
           for (let item of foundItems) {
 
-            const score = 0;
+            let score = 0;
             
             if(lostItem.name.toLowerCase().includes(item.name.toLowerCase())){
               score += 30
@@ -29,18 +30,23 @@ const matchedItems = async (lostItems, foundItems) => {
               score += 30
             }
 
-            if(lostItem.dateLost.includes(item.date)){
-              score += 10
-            }
+            // if(lostItem.dateLost.includes(item.date)){
+            //   score += 10
+            // }
 
-            if(score => 60){
-              await sendMatchedItemsMail(lostItem.email, [item])
+            if(score >= 60){
+              matches.push(item)
+              
             }
 
           }
+          if(matches.length > 0){
+              await sendMatchedItemsMail(lostItem.userId.email, matches)
+          }
         }
 
-        matches.push(item)
+  
+        // console.log(matches)
 
 
     

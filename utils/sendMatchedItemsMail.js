@@ -3,8 +3,8 @@ const sendMail = require('./sendMails');
 
 
 
-async function sendMatchedItemsMail(userEmail, item) {
-  if (!item || item.length === 0) {
+async function sendMatchedItemsMail(userEmail, matchedItems) {
+  if (!matchedItems || matchedItems.length === 0) {
     return;
   }
 
@@ -26,7 +26,7 @@ async function sendMatchedItemsMail(userEmail, item) {
           <strong>Description:</strong> ${item.description}<br/>
           <strong>Location:</strong> ${item.location}<br/>
           <strong>Date:</strong> ${item.date || 'N/A'}<br/>
-          <strong>Status:</strong> ${item.status || 'unclaimed'}<br/>
+          <strong>Status:</strong> ${item.claimed}<br/>
           <img src="${item.image}" alt="${item.name}" style="max-width:200px; max-height:200px;"/><br/>
           <a href="${item.id || '#'}" target="_blank">View Item</a>
         </li>

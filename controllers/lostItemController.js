@@ -37,13 +37,12 @@ const HandleReportLostItem = async (req, res) => {
      await lostItem.save()
   
 
-     await matchedItems
-     
+    
 
      res.status(201).json({ 
         message: "Lost item reported successfully",
         lostItem,
-        matched
+      
      })
  
 
