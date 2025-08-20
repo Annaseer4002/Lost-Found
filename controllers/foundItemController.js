@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const Item = require("../models/foundItemModel");
 const { allFoundItems } = require('../services/foundItemServices');
-const matchedItems = require('../services/matchItemService');
+
 const LostItem = require('../models/lostItemModel');
 const sendMatchedItemsMail = require('../utils/sendMatchedItemsMail');
 
@@ -35,15 +35,15 @@ const HandleReportFoundItem = async (req, res) => {
 
     await item.save();
 
-    // await matchedItems()
+    
 
-    // check if matched Lost items
+    // check if it matched Lost items
     const lostItems = await LostItem.find({status:'pending'}).populate('userId', 'email')
       
     // const matches = [];
 
     for(lostItem of lostItems){
-         const matches = [];
+        //  const matches = [];
 
 
         let score = 0
@@ -57,14 +57,14 @@ const HandleReportFoundItem = async (req, res) => {
             score += 30
         }
         
-        const dateDiff = Math.abs(new Date(lostItem.dateLost) - new Date(item.date));
+        const dateDiff = Math.abs(new Date(lostItem.dateLost) - new Date(item.dateFound));
         const diffInDays = dateDiff / (1000 * 60 * 60 * 24);
         if (diffInDays <= 3) score += 10;
 
         if(score >= 60){
        console.log(item)
-          matches.push(item)
-         await sendMatchedItemsMail(lostItem.userId.email, matches)
+        //   matches.push(item)
+         await sendMatchedItemsMail(lostItem.userId.email, item)
 
         }
  
@@ -83,11 +83,11 @@ const HandleReportFoundItem = async (req, res) => {
             name: item?.name,
             description: item?.description,
             location: item?.location,
-            date: item?.date,
+            date: item?.dateFound,
             claimed: item?.claimed,
             image: item?.image
         },
-        possibleMatches: matches || "No matches found"
+        possibleMatches: lostItem.length || "No matches found"
         // matchedItems
     })
 }
@@ -95,7 +95,7 @@ const HandleReportFoundItem = async (req, res) => {
 const HandleFindUnclaimedItems = async (req, res) => {
     try {
         
-        const unclaimedItems = await Item.find({ claimed: 'unclaimed' }).populate('userId', 'username email');
+        const unclaimedItems = await Item.find({ claimed: 'unclaimed' }).populate('userId', 'username email avatar');
 
         if(!unclaimedItems){
             return res.status(404).json({message: "No unclaimed items found"});
@@ -103,6 +103,7 @@ const HandleFindUnclaimedItems = async (req, res) => {
    
         res.status(200).json({
           message: "Success",
+          count: unclaimedItems.length,
           unclaimedItems})        
 
 
@@ -165,7 +166,7 @@ const HandleUpdateItemToClaimed = async (req, res) => {
 
 const HandleDeleteItem = async (req, res) => {
     try {
-         const {id} = req.body
+         const {id} = req.params
 
     const deletedItem = await Item.findByIdAndDelete(id);
 
@@ -183,6 +184,7 @@ const HandleFindAllFoundItems = async (req, res) => {
 
          res.status(200).json({
             message: 'Success',
+            count: foundItems.length || 'no items found',
             foundItems
          })
         

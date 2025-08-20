@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Auth = require('../models/authModel');
 
+
 const HandleSignUp = async (req, res) => {
     const {username, email, password, phoneNumber} = req.body;
     
@@ -14,7 +15,7 @@ const HandleSignUp = async (req, res) => {
          username,
          email,
          password: hashedPassword,
-         phoneNumber
+         phoneNumber, 
        }) 
 
        await user.save();
@@ -26,7 +27,8 @@ const HandleSignUp = async (req, res) => {
             username: user?.username,
             email: user?.email,
             phoneNumber: user?.phoneNumber,
-            role: user?.role
+            role: user?.role,
+            avatar: user?.avatar
          }
        })
         
@@ -78,10 +80,12 @@ const HandleLogin = async (req, res) => {
         token,
         refreshToken,
         user: {
-            email: user?.email,
+            id: user?._id,
             username: user?.username,
-            role: user?.role
-
+            email: user?.email,
+            phoneNumber: user?.phoneNumber,
+            role: user?.role,
+            avatar: user?.avatar
         }
     })
 
@@ -94,11 +98,51 @@ const HandleLogin = async (req, res) => {
         
 }
 
+const forgotPassword = async (req, res) => {
+        try {
+            const {email} = req.body
+            const user = await Auth.findOne({email})
+            if(!user) return res.status(400).json({msg: "This email does not exist."})
+
+            // const access_token = createAccessToken({id: user._id})
+            // const url = `${CLIENT_URL}/user/reset/${access_token}`
+
+            sendMail(email, url, "Reset your password")
+            res.json({msg: "Re-send the password, please check your email."})
+        } catch (err) {
+            return res.status(500).json({msg: err.message})
+        }
+    }
+const resetPassword = async (req, res) => {
+        try {
+            const {password} = req.body
+            // console.log(password)
+            const passwordHash = await bcrypt.hash(password, 12)
+
+            await Auth.findOneAndUpdate({_id: req.user.id}, {
+                password: passwordHash
+            })
+
+            res.json({msg: "Password successfully changed!"})
+        } catch (err) {
+            return res.status(500).json({msg: err.message})
+        }
+    }
+
+const logout = async (req, res) => {
+        try {
+            res.clearCookie('refreshtoken', {path: '/user/refresh_token'})
+            return res.json({msg: "Logged out."})
+        } catch (err) {
+            return res.status(500).json({msg: err.message})
+        }
+    }
+
 const HandleFindAllUsers = async (req, res) => {
     
     try {
         
-        const allUsers = await Auth.find()
+        const allUsers = await Auth.find().select('-password')
        
         if(allUsers.length === 0){
             return res.status(404).json({message: "No users found"})
@@ -106,13 +150,8 @@ const HandleFindAllUsers = async (req, res) => {
 
         res.status(200).json({
             message: "Success",
-            allUsers: allUsers.map(user => ({
-                id: user._id,
-                username: user.username,
-                email: user.email,
-                phoneNumber: user.phoneNumber,
-                role: user.role
-            }))
+            count: allUsers.length || 'No users found',
+            allUsers
         })
         
 
@@ -123,6 +162,54 @@ const HandleFindAllUsers = async (req, res) => {
     }
    
 }
+
+const findUserInfo = async (req, res) => {
+     try {
+            const user = await Auth.findById(req.user.id).select('-password')
+
+            res.json(user)
+        } catch (err) {
+            return res.status(500).json({msg: err.message})
+        }
+}
+
+const updateUserProfile = async (req, res) => {
+        try {
+            const {username, avatar} = req.body
+            await Auth.findOneAndUpdate({_id: req.user.id}, {
+                username, avatar
+            })
+
+            res.json({msg: "Update Success!"})
+        } catch (err) {
+            return res.status(500).json({msg: err.message})
+        }
+    }
+const updateUsersRole = async (req, res) => {
+        try {
+
+          
+
+         const user = await Auth.findOneAndUpdate({_id: req.params.id}, 
+              {$set: {role: "admin"}} 
+            )
+
+            res.json(
+                {msg: "Update Success!",
+                       user: {
+                    id: user?._id,
+                    username: user?.username,
+                    email: user?.email,
+                    phoneNumber: user?.phoneNumber,
+                    role: user?.role,
+                    avatar: user?.avatar
+                }
+                }
+              )
+        } catch (err) {
+            return res.status(500).json({msg: err.message})
+        }
+    }
 
 const HandleDeleteUser = async (req, res) => {
     const {id} = req.params;
@@ -153,5 +240,11 @@ module.exports = {
     HandleSignUp,
     HandleLogin,
     HandleFindAllUsers,
-    HandleDeleteUser
+    HandleDeleteUser,
+    forgotPassword,
+    resetPassword,
+    logout,
+    findUserInfo,
+    updateUserProfile,
+    updateUsersRole
 }

@@ -58,10 +58,11 @@ const HandleGetAllLostItems = async (req, res) => {
     
     try {
 
-        const allLostItems = await LostItem.find().populate('userId', 'username email')
+        const allLostItems = await LostItem.find().populate('userId', 'username email avatar')
 
         res.status(200).json({
             message: 'All lost items retrieved successfully',
+            count: allLostItems.length || 'No lost items found',
             allLostItems
         })
         
@@ -143,9 +144,43 @@ const HandleUpdateLostItemToFound = async (req, res) => {
 
 }
 
+const findLostItem = async (req, res) => {
+    try {
+
+        const lostItem = await LostItem.findOne({_id: req.params.id}).populate('userId', 'email username avatar')
+        
+        res.status(200).json({
+            msg: 'success',
+            lostItem
+        })
+    } catch (error) {
+        res.status(500).json(error.message)
+    }
+}
+
+const updateLostItem = async (req, res) => {
+    try {
+        const { name, image, description, location } = req.body
+
+        const lostItem = await LostItem.findOneAndUpdate(req.params.id, 
+            req.body
+        )
+
+        res.status(200).json({
+            msg: 'update success',
+            lostItem
+        })
+
+    } catch (error) {
+        res.status(500).json(error.message)
+    }
+}
+
 module.exports = {
     HandleReportLostItem,
     HandleGetAllLostItems,
     HandleDeleteLostItemReport,
-    HandleUpdateLostItemToFound
+    HandleUpdateLostItemToFound,
+    findLostItem,
+    updateLostItem
 }
