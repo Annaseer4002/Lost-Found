@@ -176,11 +176,35 @@ const updateLostItem = async (req, res) => {
     }
 }
 
+const HandleSearchLostItem = async (req, res) => {
+    try {
+
+        const searchItem = req.query.q
+
+        if(!searchItem){
+            return res.status(400).json('search term is required')
+        }
+
+        const result = await LostItem.find({
+            $or: [
+                        { name: { $regex: searchItem, $options: 'i' } },
+                        { description: { $regex: searchItem, $options: 'i' } },
+                        { location: { $regex: searchItem, $options: 'i' } }
+            ]
+        });
+
+        res.status(200).json(result)
+        
+    } catch (error) {
+        res.status(500).json(error.message)
+    }
+}
 module.exports = {
     HandleReportLostItem,
     HandleGetAllLostItems,
     HandleDeleteLostItemReport,
     HandleUpdateLostItemToFound,
     findLostItem,
-    updateLostItem
+    updateLostItem,
+    HandleSearchLostItem
 }

@@ -194,6 +194,40 @@ const HandleFindAllFoundItems = async (req, res) => {
    
 }
 
+const HandleSearchFoundItems = async (req, res) => {
+
+
+    try {
+
+         const searchTerm = req.query.q; // Get search term from query parameters
+
+            if (!searchTerm) {
+                return res.status(400).json({ error: 'Search term is required' });
+            }
+
+            try {
+                // Perform database query based on the search term
+                // Example with Mongoose:
+                const results = await Item.find({ 
+                    $or: [
+                        { name: { $regex: searchTerm, $options: 'i' } },
+                        { description: { $regex: searchTerm, $options: 'i' } },
+                        { location: { $regex: searchTerm, $options: 'i' } }
+                    ]
+                });
+                res.json(results);
+            } catch (error) {
+                console.error('Search error:', error);
+                res.status(500).json({ error: 'Internal server error' });
+            }
+        
+    } catch (error) {
+        res.status(500).json(error.message)
+    }
+  
+          
+        }
+
 
 
 module.exports = {
@@ -202,5 +236,6 @@ module.exports = {
     HandleGetOneItem,
     HandleUpdateItemToClaimed,
     HandleDeleteItem,
-    HandleFindAllFoundItems
+    HandleFindAllFoundItems,
+    HandleSearchFoundItems
 }
